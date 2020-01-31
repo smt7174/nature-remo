@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: suzukima_nature_remo_app
+service: suzukima-nature-remo-app
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -23,6 +23,11 @@ service: suzukima_nature_remo_app
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: dev
+  region: ap-northeast-1
+  stackName: ${self:service}
+  apiName: api-${self:service}
+  profile: default
 
 # you can overwrite defaults here
 #  stage: dev
@@ -63,13 +68,13 @@ functions:
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
+    events:
+      - http:
+          path: /sensors
+          method: get
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
+      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
 #      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
 #      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
