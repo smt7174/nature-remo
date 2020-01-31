@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.hello = async event => {
+module.exports.index = async event => {
 
   console.info(`[event] ${event}`);
 

@@ -1,5 +1,5 @@
 {
-  "name": "nature-remo",
+  "name": "lambda",
   "version": "1.0.0",
   "description": "",
   "main": "handler.js",
@@ -8,5 +8,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
 }

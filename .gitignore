@@ -1,6 +1,14 @@
+#package files
+restClient.txt
+package-lock.json
+devices.txt
+
 # package directories
 node_modules
 jspm_packages
 
 # Serverless directories
 .serverless
+
+# lambda directories
+lambda/node_modules
