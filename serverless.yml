@@ -63,7 +63,21 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
+  getAllEvents:
+    handler: getAllEvents.index
+    name: getAllEvents
+    environment:
+      key: value
+    events:
+      - http:
+          path: /allevents
+          method: get
+          request:
+            parameters:
+              querystrings:
+                date: false
+
+  getNewestEvents:
     handler: getNewestEvents.index
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -100,7 +114,6 @@ functions:
 #          conditions:
 #            host: example.com
 #            path: /hello
-
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
