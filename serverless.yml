@@ -20,6 +20,12 @@ service: suzukima-nature-remo-app
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+custom:
+  NatureRemoAccessToken: ${file(./crypto.js):getDecriptedAccessToken}
+  DynamoDbTableName:
+  SecretManagerName:
+  S3BucketName:
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -63,8 +69,17 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
+  getNewestEvents:
+    handler: getNewestEvents.handler
+    name: getNewestEvents
+    events:
+      - http:
+          path: /newestevents
+          method: get
+      - schedule: rate(60 minutes)
+
   getAllEvents:
-    handler: getAllEvents.index
+    handler: getAllEvents.handler
     name: getAllEvents
     environment:
       key: value
@@ -77,18 +92,24 @@ functions:
               querystrings:
                 date: false
 
-  getNewestEvents:
-    handler: getNewestEvents.index
+  createQsJson:
+    handler: createQsJson.handler
+    name: createQsJson
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
+    environment:
+      S3_BUCKET_NAME: ${self:custom.S3BucketName}
     events:
-      - http:
-          path: /newestevents
-          method: get
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - NatureRemoDynamoDBTable
+              - StreamArn
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
-      - schedule: rate(60 minutes)
+#      - schedule: rate(60 minutes)
 #      - sns: greeter-topic
 #      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
 #      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
@@ -119,12 +140,36 @@ functions:
 #      variable2: value2
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
+resources:
+  Resources:
+    NatureRemoDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.DynamoDbTableName}
+        AttributeDefinitions:
+          - AttributeName: date_time
+            AttributeType: S
+        KeySchema:
+          - AttributeName: date_time
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+
+    NatureRemoSecretManager:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: ${self:custom.SecretManagerName}
+        Description: Nature-RemoのAccessToken
+        SecretString: '{"AccessToken": "${self:custom.NatureRemoAccessToken}"}'
+
+    NatureRemoBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.S3BucketName}
+
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"
