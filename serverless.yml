@@ -21,10 +21,10 @@ service: suzukima-nature-remo-app
 # frameworkVersion: "=X.X.X"
 
 custom:
+  SecretManagerName: nature-remo-secret
+  DynamoDbTableName: nature-remo-events-history
+  S3BucketName: nature-remo-event
   NatureRemoAccessToken: ${file(./crypto.js):getDecriptedAccessToken}
-  DynamoDbTableName:
-  SecretManagerName:
-  S3BucketName:
 
 provider:
   name: aws
@@ -56,8 +56,9 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-#  environment:
+  environment:
 #    variable1: value1
+    TZ: Asia/Tokyo
 
 # you can add packaging information here
 #package:
@@ -77,12 +78,13 @@ functions:
           path: /newestevents
           method: get
       - schedule: rate(60 minutes)
+    environment:
+      SECRET_MANAGER_NAME: ${self:custom.SecretManagerName}
+      DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}
 
   getAllEvents:
     handler: getAllEvents.handler
     name: getAllEvents
-    environment:
-      key: value
     events:
       - http:
           path: /allevents
@@ -91,6 +93,8 @@ functions:
             parameters:
               querystrings:
                 date: false
+    environment:
+      DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}
 
   createQsJson:
     handler: createQsJson.handler
@@ -98,8 +102,6 @@ functions:
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
-    environment:
-      S3_BUCKET_NAME: ${self:custom.S3BucketName}
     events:
       - stream:
           type: dynamodb
@@ -107,6 +109,9 @@ functions:
             Fn::GetAtt:
               - NatureRemoDynamoDBTable
               - StreamArn
+    environment:
+      S3_BUCKET_NAME: ${self:custom.S3BucketName}
+
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(60 minutes)

@@ -2,6 +2,7 @@
 restClient.txt
 package-lock.json
 devices.txt
+crypto.js
 
 # package directories
 node_modules
