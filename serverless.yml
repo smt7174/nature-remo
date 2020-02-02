@@ -22,6 +22,7 @@ service: suzukima-nature-remo-app
 
 custom:
   SecretManagerName: nature-remo-secret
+  SecretManagerSecretId: AccessToken
   DynamoDbTableName: nature-remo-events-history
   S3BucketName: nature-remo-event
   NatureRemoAccessToken: ${file(./crypto.js):getDecriptedAccessToken}
@@ -40,7 +41,13 @@ provider:
 #  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource:
+        -
+          Ref: NatureRemoSecretManager
 #    - Effect: "Allow"
 #      Action:
 #        - "s3:ListBucket"
@@ -71,19 +78,20 @@ provider:
 
 functions:
   getNewestEvents:
-    handler: getNewestEvents.handler
+    handler: lambda/getNewestEvents.handler
     name: getNewestEvents
     events:
       - http:
           path: /newestevents
           method: get
-      - schedule: rate(60 minutes)
+      - schedule: cron(0 * * * ? *)
     environment:
       SECRET_MANAGER_NAME: ${self:custom.SecretManagerName}
       DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}
+      SECRET_MANAGER_SECRET_ID: ${self:custom.SecretManagerSecretId}
 
   getAllEvents:
-    handler: getAllEvents.handler
+    handler: lambda/getAllEvents.handler
     name: getAllEvents
     events:
       - http:
@@ -97,7 +105,7 @@ functions:
       DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}
 
   createQsJson:
-    handler: createQsJson.handler
+    handler: lambda/createQsJson.handler
     name: createQsJson
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -168,7 +176,7 @@ resources:
       Properties:
         Name: ${self:custom.SecretManagerName}
         Description: Nature-RemoのAccessToken
-        SecretString: '{"AccessToken": "${self:custom.NatureRemoAccessToken}"}'
+        SecretString: '{"${self:custom.SecretManagerSecretId}": "${self:custom.NatureRemoAccessToken}"}'
 
     NatureRemoBucket:
       Type: AWS::S3::Bucket
