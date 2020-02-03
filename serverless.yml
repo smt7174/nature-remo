@@ -26,6 +26,7 @@ custom:
   DynamoDbTableName: nature-remo-events-history
   S3BucketName: nature-remo-event
   NatureRemoAccessToken: ${file(./crypto.js):getDecriptedAccessToken}
+  Asterisk: "*"
 
 provider:
   name: aws
@@ -46,12 +47,35 @@ provider:
       Action:
         - secretsmanager:GetSecretValue
       Resource:
+        - Ref: NatureRemoSecretManager
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:Query
+      Resource:
         -
-          Ref: NatureRemoSecretManager
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+          Fn::GetAtt:
+            - NatureRemoDynamoDBTable
+            - Arn
+    - Effect: "Allow"
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - arn:aws:lambda:${self:provider.region}:659547760577:function:getAllEvents
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+      Resource:
+        -
+          Fn::GetAtt:
+            - NatureRemoBucket
+            - Arn
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+      Resource:
+        - ${self:custom.Asterisk}
 #    - Effect: "Allow"
 #      Action:
 #        - "s3:PutObject"

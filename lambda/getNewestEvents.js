@@ -7,11 +7,9 @@ module.exports.handler = async event => {
 
   const accessToken = await getNatureRemoAccessToken();
   const eventsData = await getNewestEventsData(accessToken);
+  await putEventsData(eventsData);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(eventsData)
-  };
+  return;
 
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
@@ -43,17 +41,37 @@ async function getNewestEventsData(token) {
     },
   });
 
-  const natureRemoData = await axios.get("/devices");
-  console.log(`[natureRemoData] ${JSON.stringify(natureRemoData.data)}`);
-  const newestEvents = natureRemoData.data[0]['newest_events'];
+  const response = await axios.get("/devices");
+  console.log(`[response] ${JSON.stringify(response.data)}`);
+  const newestEvents = response.data[0]['newest_events'];
   console.log(`[newestEvents] ${JSON.stringify(newestEvents)}`);
+
+  const moment = require("moment");
 
   const newestValues = {
     temperature: newestEvents['te']['val'],
     humidity: newestEvents['hu']['val'],
-    brightness: newestEvents['il']['val']
+    brightness: newestEvents['il']['val'],
+    date_time: moment().format("YYYY-MM-DD HH:mm:ss")
   }
 
   console.log(`[newestValues] ${JSON.stringify(newestValues)}`);
   return newestValues;
+}
+
+async function putEventsData(data) {
+
+  console.log(`[data] ${JSON.stringify(data)}`);
+  const documentClient = new AWS.DynamoDB.DocumentClient();
+  const params = {
+    TableName : process.env.DYNAMO_DB_TABLE_NAME,
+    Item: data
+  }
+
+  console.log(`[params] ${JSON.stringify(params)}`);
+
+  await documentClient.put(params).promise();
+  console.log(`${data.date_time} 1件のデータを登録しました。`);
+
+  return;
 }
