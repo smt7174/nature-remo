@@ -47,12 +47,15 @@ async function getNewestEventsData(token) {
   console.log(`[newestEvents] ${JSON.stringify(newestEvents)}`);
 
   const moment = require("moment");
+  const timestamp = moment();
 
   const newestValues = {
+    app_name : process.env.APP_NAME,
+    date_time_num: parseInt(timestamp.format("YYYYMMDDHHmmss")),
+    date_time: timestamp.format("YYYY-MM-DD HH:mm:ss"),
     temperature: newestEvents['te']['val'],
     humidity: newestEvents['hu']['val'],
-    brightness: newestEvents['il']['val'],
-    date_time: moment().format("YYYY-MM-DD HH:mm:ss")
+    brightness: newestEvents['il']['val']
   }
 
   console.log(`[newestValues] ${JSON.stringify(newestValues)}`);

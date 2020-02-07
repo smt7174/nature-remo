@@ -27,6 +27,8 @@ custom:
   S3BucketName: nature-remo-event
   NatureRemoAccessToken: ${file(./crypto.js):getDecriptedAccessToken}
   Asterisk: "*"
+  AppName: "NatureRemoTest"
+  AthenaPrefix: nature_remo_events
 
 provider:
   name: aws
@@ -59,37 +61,21 @@ provider:
             - Arn
     - Effect: "Allow"
       Action:
-        - lambda:InvokeFunction
-      Resource:
-        - arn:aws:lambda:${self:provider.region}:659547760577:function:getAllEvents
-    - Effect: "Allow"
-      Action:
         - "s3:PutObject"
         - "s3:GetObject"
       Resource:
-        -
-          Fn::GetAtt:
-            - NatureRemoBucket
-            - Arn
+        - arn:aws:s3:::${self:custom.S3BucketName}/*
     - Effect: "Allow"
       Action:
         - "lambda:InvokeFunction"
       Resource:
         - ${self:custom.Asterisk}
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
 
 # you can define service wide environment variables here
   environment:
 #    variable1: value1
     TZ: Asia/Tokyo
+    APP_NAME: ${self:custom.AppName}
 
 # you can add packaging information here
 #package:
@@ -184,11 +170,19 @@ resources:
       Properties:
         TableName: ${self:custom.DynamoDbTableName}
         AttributeDefinitions:
-          - AttributeName: date_time
+          -
+            AttributeName: app_name
             AttributeType: S
+          -
+            AttributeName: date_time_num
+            AttributeType: N
         KeySchema:
-          - AttributeName: date_time
+          -
+            AttributeName: app_name
             KeyType: HASH
+          -
+            AttributeName: date_time_num
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -206,6 +200,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.S3BucketName}
+
+    NatureRemoAthena:
+      Type: AWS::Athena::NamedQuery
+      Properties:
+        Database: ${self:custom.AthenaPrefix}
+        Description: "query for nature_remo_events made by makky12"
+        Name: ${self:custom.AthenaPrefix}_query
+        QueryString: SELECT date_time, temperature, humidity, brightness FROM ${self:custom.AthenaPrefix} ORDER BY date_time
 
 #  Outputs:
 #     NewOutput:
