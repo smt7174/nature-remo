@@ -10,7 +10,7 @@ module.exports.getDecryptedAccessToken = () => {
     const salt = 'your-salt-phrase';
 
     // encryption.
-    // if you don't know encrypted value, you can confirm it to uncomment and execute sources of line 12 and 13.
+    // if you don't know encrypted value, you can confirm it to uncomment and execute sources of line 16 and 17.
     // (Encrypted value is displayed at your console as a log)
     // set password value you want to encrypt and decript to planeText.
     // const planeText = 'your-original-password-value';
