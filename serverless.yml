@@ -29,6 +29,7 @@ custom:
   Asterisk: "*"
   AppName: "NatureRemoTest"
   AthenaPrefix: nature_remo_events
+  timeStamp: ${file(./timestamp.js):getTimeStamp}
 
 provider:
   name: aws
@@ -205,9 +206,25 @@ resources:
       Type: AWS::Athena::NamedQuery
       Properties:
         Database: ${self:custom.AthenaPrefix}
-        Description: "query for nature_remo_events made by makky12"
-        Name: ${self:custom.AthenaPrefix}_query
-        QueryString: SELECT date_time, temperature, humidity, brightness FROM ${self:custom.AthenaPrefix} ORDER BY date_time
+        Description: "select query for ${self:custom.AthenaPrefix}"
+        Name: ${self:custom.AthenaPrefix}_query_${self:custom.timeStamp}
+        QueryString: "SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness FROM ${self:custom.AthenaPrefix}, UNNEST(events) AS t(event) ORDER BY event.date_time"
+
+    NatureRemoAthenaDDL:
+      Type: AWS::Athena::NamedQuery
+      Properties:
+        Database: ${self:custom.AthenaPrefix}
+        Description: "create external table DDL query of ${self:custom.AthenaPrefix}"
+        Name: ${self:custom.AthenaPrefix}_create_external_table_${self:custom.timeStamp}
+        QueryString: "CREATE EXTERNAL TABLE IF NOT EXISTS ${self:custom.AthenaPrefix}.${self:custom.AthenaPrefix} (events ARRAY<STRUCT<date_time:TIMESTAMP, temperature: FLOAT, humidity:INT, brightness:FLOAT>>) ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe' LOCATION 's3://${self:custom.S3BucketName}/'"
+
+    NatureRemoAthenaView:
+      Type: AWS::Athena::NamedQuery
+      Properties:
+        Database: ${self:custom.AthenaPrefix}
+        Description: "create VIEW DDL query of ${self:custom.AthenaPrefix}"
+        Name: ${self:custom.AthenaPrefix}_create_view_${self:custom.timeStamp}
+        QueryString: "CREATE OR REPLACE VIEW ${self:custom.AthenaPrefix}_view AS SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness FROM nature_remo_events, UNNEST(events) AS t(event) ORDER BY event.date_time"
 
 #  Outputs:
 #     NewOutput:
