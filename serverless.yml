@@ -95,7 +95,7 @@ functions:
       - http:
           path: /newestevents
           method: get
-      - schedule: cron(0 * * * ? *)
+      - schedule: cron(5 * * * ? *)
     environment:
       SECRET_MANAGER_NAME: ${self:custom.SecretManagerName}
       DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}

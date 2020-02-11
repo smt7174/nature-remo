@@ -7,6 +7,12 @@ module.exports.handler = async event => {
   console.info(`[event] ${JSON.stringify(event)}`);
   console.info(`[invoked] ${moment().format("YYYY-MM-DD HH:mm:ss")} に実行されました。`);
 
+  const nowHour = moment().hour();
+  if(nowHour !== 7 && nowHour !== 19) {
+    console.info(`[canceled] 7時でも19時でもないため、処理を終了します。`);
+    return;
+  }
+
   const allEventData = await getAllEventsData();
   console.log(`[allEventData] ${JSON.stringify(allEventData)}`);
 
