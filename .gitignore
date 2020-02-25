@@ -13,3 +13,4 @@ jspm_packages
 
 # lambda directories
 lambda/node_modules
+pkg
