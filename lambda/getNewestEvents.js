@@ -4,11 +4,12 @@ const AWS = require('aws-sdk');
 module.exports.handler = async event => {
 
   console.info(`[event] ${JSON.stringify(event)}`);
-  console.info(`[info] serverless trigger ci/cd run`);
 
   const accessToken = await getNatureRemoAccessToken();
   const eventsData = await getNewestEventsData(accessToken);
   await putEventsData(eventsData);
+
+  console.info(`[info] Serverless Framework monitor CI/CD ran`);
 
   const response = {
     statusCode: 200,
