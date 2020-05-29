@@ -11,5 +11,7 @@ jspm_packages
 .serverless
 
 # lambda directories
-lambda/node_modules
 pkg
+/lambda/package.json
+/lambda/package-lock.json
+!/lambda/node_modules
