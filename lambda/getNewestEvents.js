@@ -4,12 +4,18 @@ const AWS = require('aws-sdk');
 module.exports.handler = async event => {
 
   console.info(`[event] ${JSON.stringify(event)}`);
+  console.info(`[info] serverless trigger ci/cd ran`);
 
   const accessToken = await getNatureRemoAccessToken();
   const eventsData = await getNewestEventsData(accessToken);
   await putEventsData(eventsData);
 
-  return;
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify(eventsData)
+  };
+
+  return response;
 
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
