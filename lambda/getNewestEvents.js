@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 module.exports.handler = async event => {
 
   console.info(`[event] ${JSON.stringify(event)}`);
-  console.info(`[info] serverless trigger ci/cd ran`);
+  console.info(`[info] serverless trigger ci/cd run`);
 
   const accessToken = await getNatureRemoAccessToken();
   const eventsData = await getNewestEventsData(accessToken);
