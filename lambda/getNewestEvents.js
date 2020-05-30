@@ -9,7 +9,7 @@ module.exports.handler = async event => {
   const eventsData = await getNewestEventsData(accessToken);
   await putEventsData(eventsData);
 
-  console.info(`[info] Serverless Framework monitor CI/CD ran`);
+  console.info(`[info] Serverless Framework monitor CI/CD run`);
 
   const response = {
     statusCode: 200,
