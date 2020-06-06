@@ -16,6 +16,9 @@ service: suzukima-nature-remo-app
 app: nature-remo
 org: suzukima
 
+plugins:
+  - serverless-plugin-scripts
+
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
@@ -30,6 +33,10 @@ custom:
   AppName: "NatureRemoTest"
   AthenaPrefix: nature_remo_events
   timeStamp: ${file(./timestamp.js):getTimeStamp}
+  scripts:
+    hooks:
+      - 'before:deploy:deploy': ${file(./beforedeploy.js):beforeDeploy}
+      - 'deploy:finalize': ${file(./finalizedeploy.js):finalyzeDeploy}
 
 provider:
   name: aws

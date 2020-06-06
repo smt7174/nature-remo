@@ -14,4 +14,4 @@ jspm_packages
 pkg
 /lambda/package.json
 /lambda/package-lock.json
-!/lambda/node_modules
+/lambda/node_modules
