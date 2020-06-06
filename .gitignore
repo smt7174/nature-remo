@@ -12,6 +12,5 @@ jspm_packages
 
 # lambda directories
 pkg
-/lambda/package.json
 /lambda/package-lock.json
 /lambda/node_modules
