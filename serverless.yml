@@ -35,8 +35,8 @@ custom:
   timeStamp: ${file(./timestamp.js):getTimeStamp}
   scripts:
     hooks:
-      - 'before:deploy:deploy': ${file(./beforedeploy.js):beforeDeploy}
-      - 'deploy:finalize': ${file(./finalizedeploy.js):finalizeDeploy}
+      - 'before:deploy:deploy': npm run beforedeploy
+      - 'deploy:finalize': npm run finalizedeploy
 
 provider:
   name: aws
