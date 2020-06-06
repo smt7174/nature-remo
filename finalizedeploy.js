@@ -1,4 +1,4 @@
 module.exports.finalizeDeploy = () => {
     console.log("finalizeDeploy Executed");
-    return;
+    return 0;
 };
