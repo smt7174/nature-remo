@@ -36,7 +36,7 @@ custom:
   scripts:
     hooks:
       - 'before:deploy:deploy': ${file(./beforedeploy.js):beforeDeploy}
-      - 'deploy:finalize': ${file(./finalizedeploy.js):finalyzeDeploy}
+      - 'deploy:finalize': ${file(./finalizedeploy.js):finalizeDeploy}
 
 provider:
   name: aws
