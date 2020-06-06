@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0",
     "preinstall": "echo \"preinstall command executed\" && exit 0",
-    "postinstall": "echo \"postinstall command executed\" && exit 0",
+    "postinstall": "cd lambda && npm i && cd ../ && exit 0",
     "beforedeploy": "echo \"beforedeploy executed\" && exit 0",
     "finalizedeploy": "echo \"finalizedeploy executed\" && exit 0"
   },
