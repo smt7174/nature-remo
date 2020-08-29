@@ -58,7 +58,8 @@ function mapEventLog(event_log) {
     date_time:　item.date_time,
     temperature: item.temperature,
     humidity:item.humidity,
-    brightness:item.brightness
+    brightness:item.brightness,
+    absolute_humidity: item.absolute_humidity
   }));
 
   return mapped_event_log;

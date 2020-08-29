@@ -18,6 +18,7 @@ org: suzukima
 
 plugins:
   - serverless-plugin-scripts
+  - sample
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -138,6 +139,13 @@ functions:
     environment:
       S3_BUCKET_NAME: ${self:custom.S3BucketName}
 
+  putAbsoluteHumidity:
+    handler: lambda/putAbsoluteHumidity.handler
+    name: putAbsoluteHumidity
+    environment:
+      DYNAMO_DB_TABLE_NAME: ${self:custom.DynamoDbTableName}
+      
+
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(60 minutes)
@@ -196,6 +204,9 @@ resources:
           WriteCapacityUnits: 1
         StreamSpecification:
           StreamViewType: NEW_IMAGE
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
 
     NatureRemoSecretManager:
       Type: AWS::SecretsManager::Secret
@@ -215,7 +226,7 @@ resources:
         Database: ${self:custom.AthenaPrefix}
         Description: "select query for ${self:custom.AthenaPrefix}"
         Name: ${self:custom.AthenaPrefix}_query_${self:custom.timeStamp}
-        QueryString: "SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness FROM ${self:custom.AthenaPrefix}, UNNEST(events) AS t(event) ORDER BY event.date_time"
+        QueryString: "SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness, event.absolute_humidity AS absolute_humidity FROM ${self:custom.AthenaPrefix}, UNNEST(events) AS t(event) ORDER BY event.date_time"
 
     NatureRemoAthenaDDL:
       Type: AWS::Athena::NamedQuery
@@ -223,7 +234,7 @@ resources:
         Database: ${self:custom.AthenaPrefix}
         Description: "create external table DDL query of ${self:custom.AthenaPrefix}"
         Name: ${self:custom.AthenaPrefix}_create_external_table_${self:custom.timeStamp}
-        QueryString: "CREATE EXTERNAL TABLE IF NOT EXISTS ${self:custom.AthenaPrefix}.${self:custom.AthenaPrefix} (events ARRAY<STRUCT<date_time:TIMESTAMP, temperature: FLOAT, humidity:INT, brightness:FLOAT>>) ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe' LOCATION 's3://${self:custom.S3BucketName}/'"
+        QueryString: "CREATE EXTERNAL TABLE IF NOT EXISTS ${self:custom.AthenaPrefix}.${self:custom.AthenaPrefix} (events ARRAY<STRUCT<date_time:TIMESTAMP, temperature: FLOAT, humidity:INT, brightness:FLOAT, absolute_humidity:INT>>) ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe' LOCATION 's3://${self:custom.S3BucketName}/'"
 
     NatureRemoAthenaView:
       Type: AWS::Athena::NamedQuery
@@ -231,7 +242,7 @@ resources:
         Database: ${self:custom.AthenaPrefix}
         Description: "create VIEW DDL query of ${self:custom.AthenaPrefix}"
         Name: ${self:custom.AthenaPrefix}_create_view_${self:custom.timeStamp}
-        QueryString: "CREATE OR REPLACE VIEW ${self:custom.AthenaPrefix}_view AS SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness FROM nature_remo_events, UNNEST(events) AS t(event) ORDER BY event.date_time"
+        QueryString: "CREATE OR REPLACE VIEW ${self:custom.AthenaPrefix}_view AS SELECT event.date_time AS date_time, event.temperature AS temperature, event.humidity AS humidity, event.brightness AS brightness, event.absolute_humidity AS absolute_humidity FROM nature_remo_events, UNNEST(events) AS t(event) ORDER BY event.date_time"
 
 #  Outputs:
 #     NewOutput:

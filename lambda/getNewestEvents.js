@@ -55,6 +55,20 @@ async function getNewestEventsData(token) {
 
   const moment = require("moment");
   const timestamp = moment();
+  const ttl = moment().startOf('day').add(4, "d").unix();
+
+  let absoluteHumidity = -100;
+
+  try{
+    const t = parseFloat(newestEvents['te']['val']);
+    const h = parseInt(newestEvents['hu']['val']);
+    absoluteHumidity = Math.floor((6.11 * Math.pow(10, 7.5 * t / (237.3 + t)) * h) / (8.31447 * (273.15 + t)) * 18);
+  } catch(e) {
+    console.warn(e.message);
+    console.warn("absoluteHumidity cauculation failed");
+  }
+
+  console.log(`[absoluteHumidity] ${absoluteHumidity}`)
 
   const newestValues = {
     app_name : process.env.APP_NAME,
@@ -62,7 +76,9 @@ async function getNewestEventsData(token) {
     date_time: timestamp.format("YYYY-MM-DD HH:mm:ss"),
     temperature: newestEvents['te']['val'],
     humidity: newestEvents['hu']['val'],
-    brightness: newestEvents['il']['val']
+    brightness: newestEvents['il']['val'],
+    absolute_humidity: absoluteHumidity,
+    ttl: ttl
   }
 
   console.log(`[newestValues] ${JSON.stringify(newestValues)}`);
